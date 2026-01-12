@@ -1,0 +1,5 @@
+# Claude Code configuration
+.claude/
+
+# Archive (legacy files)
+.archive/
