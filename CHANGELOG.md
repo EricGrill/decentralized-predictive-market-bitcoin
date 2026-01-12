@@ -10,13 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Nothing yet
+- STAKE_REGISTRATION anchor type (0x05) for on-chain winner identification
+- Self-contained market anchors - full MarketDefinition can be embedded on-chain
+- Stake registration workflow in Bitcoin anchoring spec
 
 ### Changed
-- Nothing yet
+- **BREAKING**: Updated for Bitcoin Core v30 - OP_RETURN limit removed (now 100KB)
+- Bitcoin anchoring spec rewritten to leverage unlimited OP_RETURN
+- Q4 (Winner Identification) resolved via on-chain OP_RETURN approach
+- Q1 (ZK Genesis) updated with Confidential Containers resolution path
 
 ### Fixed
-- Nothing yet
+- Q4 no longer MVP blocker - on-chain solution eliminates coordinator trust
 
 ---
 

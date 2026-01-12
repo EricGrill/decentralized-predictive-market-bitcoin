@@ -125,9 +125,17 @@ OP_RETURN is a Bitcoin Script opcode used to create provably unspendable outputs
 - **Market Definition Anchor**: commits to `marketHash`.
 - **Witness Set Anchor**: commits to witness set changes.
 
-### 5.3 Payload Size Constraint
+### 5.3 Payload Size
 
-OP_RETURN payload must fit standard relay policies (commonly 80 bytes). CIDs or definitions longer than this MUST be compacted using a hash commitment (e.g., SHA256).
+As of Bitcoin Core v30, the previous 80-byte OP_RETURN limit has been removed from standardness rules. This protocol can now include full data payloads directly in OP_RETURN outputs rather than requiring hash commitments for larger objects.
+
+**Recommended payload strategy:**
+
+- **Small objects (≤256 bytes)**: Embed directly in OP_RETURN for self-contained verification.
+- **Large objects (>256 bytes)**: Use hash commitment + off-chain storage for efficiency.
+- **Critical immutability**: Always include at minimum a hash commitment to ensure tamper-evidence even if off-chain storage is used.
+
+This enables richer on-chain anchoring including full MarketDefinition structures, predicate parameters, and witness set configurations without requiring off-chain retrieval for verification.
 
 ---
 

@@ -14,11 +14,15 @@ The spec calls for pro-rata payouts among winners, but Taproot escrow UTXOs don'
 
 ## Severity
 
-**Critical**
+**Critical** (Resolved)
 
 ## MVP Blocker
 
-**Yes** - Cannot ship without solving this.
+**No** - Resolved via OP_RETURN stake registration (Bitcoin Core v30+).
+
+## Status
+
+**In Progress** - Solution identified, implementation pending.
 
 ---
 
@@ -120,31 +124,44 @@ registry_root = MerkleRoot(entries)
 - Trust registry operator
 - Registry availability = market liveness
 
-### Option B: OP_RETURN in Stake Transaction
+### Option B: OP_RETURN in Stake Transaction (RECOMMENDED)
+
+**As of Bitcoin Core v30, the OP_RETURN limit has been increased to 100KB, making this the preferred approach.**
 
 Require stake transactions to include return address in OP_RETURN:
 
 ```
 Stake transaction:
   Output 0: 0.5 BTC to YES escrow
-  Output 1: OP_RETURN <return_address>
+  Output 1: OP_RETURN <version | 0x05 | market_hash | return_address | side>
   Output 2: change (optional)
+
+Payload breakdown (~70 bytes):
+  version: 1 byte
+  anchor_type: 1 byte (0x05 = STAKE_REGISTRATION)
+  market_hash: 32 bytes (identifies which market)
+  return_address: 34 bytes (P2WPKH/P2TR address)
+  side: 1 byte (0x01 = YES, 0x00 = NO)
 ```
 
-**Payout builder scans:**
-1. All txs sending to escrow address
-2. Parse OP_RETURN for return address
-3. Build (return_addr, amount) list
+**Payout builder workflow:**
+1. Scan all txs sending to escrow addresses
+2. Parse OP_RETURN for STAKE_REGISTRATION anchors
+3. Filter by market_hash
+4. Build (return_addr, amount, side) list from on-chain data
+5. Construct payout transaction
 
 **Pros:**
-- Fully on-chain
-- No off-chain infrastructure
-- Permissionless verification
+- **Fully on-chain** - no off-chain infrastructure needed
+- **Permissionless verification** - anyone can reconstruct winner list
+- **Censorship resistant** - data embedded in Bitcoin
+- **No coordinator trust** - eliminates single point of failure
+- **Simple implementation** - scan + parse
 
 **Cons:**
-- Larger stake transactions
-- OP_RETURN size limits (80 bytes)
-- Must enforce format
+- Slightly larger stake transactions (~70 bytes extra)
+- Higher transaction fees (~700 extra sats @ 10 sat/vB)
+- Must enforce format (invalid OP_RETURN = stake not counted)
 
 ### Option C: Escrow Coordinator with Transparency Log
 
@@ -225,44 +242,48 @@ Verification:
 
 ## Recommended Approach
 
-**MVP:** Option C - Coordinator with transparency log
+**MVP and Production: Option B - OP_RETURN Stake Registration**
+
+With Bitcoin Core v30 removing the OP_RETURN limit (now 100KB), the on-chain approach is now the clear winner.
 
 Rationale:
-- Simplest to implement
-- Acceptable trust assumption for MVP
-- Transparency log provides accountability
-- Can migrate to more decentralized options later
+- **Fully on-chain** - no off-chain infrastructure to maintain
+- **Trustless** - no coordinator, no registry operator
+- **Censorship resistant** - stake registration is in Bitcoin
+- **Simple** - scan escrow transactions, parse OP_RETURN, done
+- **Permissionless** - anyone can verify and construct payouts
 
 ```
-MVP Implementation:
+Implementation:
 
-1. Market creator designates coordinator pubkey
-2. Coordinator operates:
-   - Stake registration endpoint
-   - Deposit address generation
-   - Public stake log (append-only)
-   - Payout construction service
+1. Define STAKE_REGISTRATION format (0x05 anchor type)
+   └─> version | 0x05 | market_hash | return_address | side
+   └─> ~70 bytes total
 
-3. Transparency guarantees:
-   - Stake log is merkle tree, root published to Nostr/IPFS
-   - Anyone can verify their stake inclusion
-   - Escrow balance = sum of logged stakes (auditable)
+2. Stake transaction requirements:
+   └─> Output 0: BTC to escrow address
+   └─> Output 1: OP_RETURN with stake registration
 
-4. Trust model:
-   - Coordinator cannot steal (doesn't control escrow keys)
-   - Coordinator CAN censor (refuse to log stakes)
-   - Coordinator CAN misattribute (wrong return address)
-   - Mitigation: reputation, legal, competition
+3. Payout builder:
+   └─> Scan all txs to escrow addresses
+   └─> Parse OP_RETURN for valid registrations
+   └─> Filter by market_hash
+   └─> Sum amounts per return_address per side
+   └─> Construct winner list
+
+4. Edge cases:
+   └─> Missing OP_RETURN: stake counts but unpayable (burned)
+   └─> Invalid format: stake counts but unpayable (burned)
+   └─> Duplicate registrations: sum amounts
 ```
 
-**Future:** Migrate to Option B (OP_RETURN) or Option A (decentralized registry)
+**Fallback:** Option C (Coordinator) only if OP_RETURN scanning proves too expensive
 
 ```
-Decentralization path:
-1. MVP: Trusted coordinator
-2. v2: Multiple competing coordinators
-3. v3: Pure on-chain with OP_RETURN
-4. v4: Decentralized registry with economic incentives
+Only use coordinator if:
+- Bitcoin indexing is prohibitively expensive
+- Real-time stake updates needed (OP_RETURN requires confirmation)
+- User experience requires instant feedback
 ```
 
 ---

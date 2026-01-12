@@ -21,7 +21,7 @@ This section documents **open design questions** identified during protocol revi
 | Q1 | [ZK Genesis Trust Boundary](Q1-zk-genesis.md) | Critical | No | 🟡 In Progress | - |
 | Q2 | [Witness Economic Model](Q2-witness-economics.md) | Critical | No | 🔴 Open | - |
 | Q3 | [UTXO Stability](Q3-utxo-stability.md) | High | No | 🔴 Open | - |
-| Q4 | [Winner Identification](Q4-winner-identification.md) | Critical | **Yes** | 🔴 Open | - |
+| Q4 | [Winner Identification](Q4-winner-identification.md) | Critical | **No** (Resolved) | 🟡 In Progress | - |
 | Q5 | [Information Asymmetry](Q5-information-asymmetry.md) | High | No | 🔴 Open | - |
 
 **Legend:**
