@@ -18,7 +18,7 @@ This section documents **open design questions** identified during protocol revi
 
 | ID | Question | Severity | MVP Blocker | Status | Owner |
 |----|----------|----------|-------------|--------|-------|
-| Q1 | [ZK Genesis Trust Boundary](Q1-zk-genesis.md) | Critical | No | 🔴 Open | - |
+| Q1 | [ZK Genesis Trust Boundary](Q1-zk-genesis.md) | Critical | No | 🟡 In Progress | - |
 | Q2 | [Witness Economic Model](Q2-witness-economics.md) | Critical | No | 🔴 Open | - |
 | Q3 | [UTXO Stability](Q3-utxo-stability.md) | High | No | 🔴 Open | - |
 | Q4 | [Winner Identification](Q4-winner-identification.md) | Critical | **Yes** | 🔴 Open | - |
