@@ -198,6 +198,142 @@ Deadline: revelation_height < resolution_height - K
 - Two-transaction overhead
 - Worse UX
 
+### Option E: Lightning Network Escrow
+
+Use Lightning channels for instant stake finality:
+
+```
+Architecture:
+┌─────────────────┐     ┌─────────────────┐
+│  Participant    │────▶│  Market Escrow  │
+│  Lightning Node │     │  Lightning Node │
+└─────────────────┘     └─────────────────┘
+         │                      │
+    Channel open           Holds stakes
+    or payment              in channels
+
+Stake flow:
+1. Market escrow = Lightning node with channels
+2. Participant opens channel or pays via existing route
+3. Stake = channel balance or received payment
+4. INSTANT finality - no confirmation wait
+
+Payout flow:
+1. Outcome determined
+2. Escrow node routes payments to winners
+3. Or: cooperative channel close with correct balances
+```
+
+**Pros:**
+- Instant finality (no reorg risk after payment)
+- Low fees
+- Private (off-chain until settlement)
+- Scales to high volume
+
+**Cons:**
+- Requires Lightning infrastructure
+- Channel capacity limits market size
+- Escrow node is semi-trusted (for routing)
+- Complexity for participants (need Lightning wallet)
+
+### Option F: Statechains
+
+Off-chain UTXO ownership transfers:
+
+```
+How statechains work:
+- UTXO ownership transferred off-chain
+- Statechain entity facilitates transfers
+- Final owner can settle on-chain anytime
+
+Application to stakes:
+1. Stake = statechain transfer to escrow
+2. Multiple stakes aggregated off-chain
+3. Ownership tracked by statechain
+4. Payout = statechain transfer back (or on-chain settle)
+```
+
+**Pros:**
+- UTXO-based (more Bitcoin-native than Lightning)
+- Off-chain = fast finality
+- Lower fees than on-chain
+- Can handle larger amounts than Lightning channels
+
+**Cons:**
+- Statechain entity trust (though non-custodial)
+- Less mature than Lightning
+- Smaller ecosystem
+- Interactivity requirements
+
+### Option G: Covenant-Based Escrow (Future)
+
+If OP_CTV or similar covenant opcodes activate:
+
+```
+Covenant mechanism:
+1. Stake UTXO has covenant restricting spend paths
+2. Covenant commits to: winner_addresses, payout_amounts
+3. Can ONLY be spent to committed outputs
+4. No external coordination needed for payout
+
+Stake with covenant:
+  scriptPubKey:
+    OP_CTV <hash_of_payout_template>
+
+  Where payout_template commits to:
+    - Winner address 1: X sats
+    - Winner address 2: Y sats
+    - Witness fee: Z sats
+
+Resolution:
+1. Witnesses sign outcome
+2. Payout tx matches committed template → spendable
+3. No UTXO instability - template was committed at stake time
+```
+
+**Pros:**
+- Fully trustless (Bitcoin Script enforced)
+- Payout paths committed upfront
+- No coordinator, no off-chain coordination
+- Elegant Bitcoin-native solution
+
+**Cons:**
+- Requires covenant soft fork (OP_CTV not yet activated)
+- Complex script construction
+- Winner addresses must be known at stake time
+- May limit flexibility
+
+### Option H: Federated Sidechain Bridge
+
+Use a federated sidechain for stake management:
+
+```
+Architecture:
+┌──────────────────┐         ┌────────────────────┐
+│  Bitcoin Mainnet │◀───────▶│  Prediction Market │
+│                  │  Bridge │  Sidechain         │
+│  Escrow UTXO     │         │  Fast finality     │
+└──────────────────┘         └────────────────────┘
+
+Flow:
+1. Peg BTC into sidechain
+2. Stake on sidechain (fast, cheap)
+3. Market resolves on sidechain
+4. Peg out winnings to mainnet
+```
+
+**Pros:**
+- Fast finality on sidechain
+- Lower fees for staking operations
+- Can support complex market logic
+- Reorg-resistant (sidechain has different consensus)
+
+**Cons:**
+- Federation trust (bridge operators)
+- Peg-in/peg-out delays
+- Additional infrastructure
+- Not purely Bitcoin-native
+
 ---
 
 ## Recommended Approach

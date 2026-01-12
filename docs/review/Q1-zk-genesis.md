@@ -462,7 +462,100 @@ Trust model: Collusion of ALL N operators required to cheat
 - Coordination overhead
 - Any single operator COULD cheat (but would be detected if others are honest)
 
-### Option G: Trusted Notary Service (MVP)
+### Option G: Trusted Hardware Wallets
+
+Use consumer hardware wallets with custom signing apps:
+
+```
+Flow:
+1. Custom app loaded onto Ledger/Trezor
+2. Hardware wallet generates key internally (never exportable)
+3. Wallet signs attestation: "I generated this key, it cannot leave"
+4. Attestation includes device certificate chain
+
+Verification:
+- Verify attestation signature
+- Verify device certificate chains to manufacturer
+- Check app hash matches approved version
+```
+
+**Pros:**
+- Widely available consumer hardware
+- Strong key isolation (hardware enforced)
+- Users already trust these devices
+- No cloud infrastructure needed
+
+**Cons:**
+- Vendor trust (Ledger, Trezor)
+- Limited programmability for complex key ceremonies
+- Custom app development and approval process
+- Device compromise affects all capsules from that device
+
+### Option H: Time-Locked Key Ceremonies
+
+Key validity requires passage of time without challenge:
+
+```
+Ceremony:
+1. Generate key pair in ceremony (any environment)
+2. Publish commitment: hash(pubkey || ceremony_transcript)
+3. Anchor commitment on Bitcoin
+4. Wait T blocks (e.g., 1008 blocks ≈ 1 week)
+5. If no valid challenge published → key accepted
+6. Challenge = proof that key was seen elsewhere
+
+Challenge types:
+- Signed message from key dated before ceremony
+- Key appears in leaked database
+- Duplicate key in another capsule
+```
+
+**Pros:**
+- No special hardware required
+- No trusted parties
+- Community can challenge suspicious capsules
+- Simple to understand
+
+**Cons:**
+- Adds delay to capsule creation
+- Doesn't prevent premeditated attacks (attacker plans week ahead)
+- Challenge mechanism needs definition
+- What constitutes valid challenge?
+
+### Option I: Federated Notary Threshold
+
+M-of-N notaries must independently attest to same output:
+
+```
+Flow:
+1. Capsule creator submits key generation request to N notaries
+2. Each notary independently:
+   - Runs key generation container
+   - Produces (pubkey, enc_privkey, attestation)
+3. Aggregator collects responses
+4. If M+ notaries produce IDENTICAL (pubkey, enc_privkey) → valid
+5. Any disagreement → reject (possible tampering)
+
+Why this works:
+- Deterministic key generation (same seed → same key)
+- Seed derived from: request_id || notary_signatures || bitcoin_block_hash
+- All notaries compute same seed → same key
+- Tampering by any notary produces different output
+```
+
+**Pros:**
+- No single point of trust
+- Detects tampering (outputs won't match)
+- Can use diverse notary implementations
+- Scales trust with N
+
+**Cons:**
+- Requires N independent parties
+- Coordination overhead
+- All N must be online simultaneously
+- Collusion of M+ notaries defeats security
+
+### Option J: Trusted Notary Service (MVP)
 
 Simplest path for MVP - designated trusted parties:
 

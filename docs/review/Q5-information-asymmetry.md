@@ -238,6 +238,191 @@ Limitation:
 - Only historical predicates
 - Less interesting market types
 
+### Option F: Automated Market Maker (AMM/Bonding Curve)
+
+Replace discrete betting with continuous price discovery:
+
+```
+Mechanism:
+- Price set by bonding curve, not order book
+- Each trade moves price along curve
+- Large trades = high slippage
+- Capsule holder's trades naturally move price against them
+
+Bonding curve example:
+  price = k * (yes_reserve / no_reserve)
+
+If holder tries to manipulate:
+1. Holder buys large NO position
+2. Price moves significantly (slippage)
+3. Holder's average cost is much higher
+4. Even if they win, profit margin compressed
+
+Self-correcting property:
+- Market prices in holder's power automatically
+- If holder controls outcome, market will price that in
+- Sophisticated traders arbitrage manipulation attempts
+```
+
+**Pros:**
+- Always liquid (no counterparty matching)
+- Self-correcting prices
+- Large manipulation = large slippage cost
+- Well-understood DeFi primitive
+
+**Cons:**
+- Impermanent loss for liquidity providers
+- Different UX than traditional betting
+- May not fully prevent small-scale manipulation
+- Complexity for users
+
+### Option G: Blind Betting (Commit-Reveal)
+
+Hide bet direction until betting period closes:
+
+```
+Two-phase betting:
+
+COMMIT PHASE (blocks 0 - H):
+1. User creates: commitment = hash(direction || amount || salt)
+2. User broadcasts commitment on-chain
+3. No one knows bet direction, only that bets exist
+
+REVEAL PHASE (blocks H - H+R):
+1. Users reveal: (direction, amount, salt)
+2. Protocol verifies: hash matches commitment
+3. Revealed bets are counted
+4. Unrevealed commitments are forfeited
+
+Resolution:
+- After reveal phase, odds are known
+- Capsule holder saw NO information during commit phase
+- Cannot make informed manipulation decision
+```
+
+**Pros:**
+- Zero information leakage during betting
+- Holder cannot react to market sentiment
+- Simple cryptographic construction
+- Battle-tested in other protocols
+
+**Cons:**
+- Two-transaction overhead
+- Must return for reveal (or lose stake)
+- Griefing: commit but don't reveal
+- Slight UX friction
+
+### Option H: Time-Weighted Stakes
+
+Earlier stakes count more, reducing last-minute manipulation:
+
+```
+Weight formula:
+  weight(stake) = (resolution_height - stake_height) / window_size
+
+Example (100-block window):
+- Stake at block -100: weight = 1.0 (full weight)
+- Stake at block -50:  weight = 0.5 (half weight)
+- Stake at block -10:  weight = 0.1 (10% weight)
+- Stake at block -1:   weight = 0.01 (negligible)
+
+Payout calculation:
+  payout[i] = stake[i] * weight[i] / sum(stake * weight)
+
+Implication for manipulation:
+- Holder sees 80% YES at block -50
+- Holder bets large on NO at block -10
+- Holder's NO stake has low weight (0.1)
+- Even winning NO, holder gets small payout
+```
+
+**Pros:**
+- Rewards early conviction
+- Punishes late (informed) manipulation
+- Gradual, no hard cutoff
+- Simple to implement
+
+**Cons:**
+- Discourages late participation
+- May reduce total liquidity
+- Adds complexity to payout math
+- Holder could still bet early if they planned ahead
+
+### Option I: Prediction Market Insurance
+
+Third-party insurance against manipulation:
+
+```
+Insurance market:
+
+1. Insurer offers "manipulation protection" policy
+2. Bettors pay small premium (e.g., 1% of stake)
+3. If outcome appears manipulated, claim triggered
+4. Insurer pays out (partial or full recovery)
+
+Manipulation detection criteria:
+- Outcome contradicts overwhelming pre-market evidence
+- Capsule holder placed large opposing bet
+- Suspicious timing patterns
+
+Insurer incentives:
+- Profitable if manipulation is rare
+- Incentivized to investigate and expose manipulators
+- Creates market for manipulation detection
+```
+
+**Pros:**
+- Market-based solution
+- Creates professional manipulation detection
+- Participants can hedge manipulation risk
+- Doesn't restrict market types
+
+**Cons:**
+- Defining "manipulation" is subjective
+- Moral hazard (insurer might not pay)
+- Insurance pricing is complex
+- Requires insurance infrastructure
+
+### Option J: Capsule Controller Staking Requirement
+
+Mandatory collateral from controller:
+
+```
+Market creation requirement:
+1. Controller must stake C = f(market_cap) as collateral
+2. Collateral locked until resolution + challenge period
+3. If manipulation proven, collateral slashed
+4. If no challenge, collateral returned
+
+Collateral formula:
+  C = max(min_collateral, market_cap * 0.2)
+
+Example:
+- Market cap: 10 BTC
+- Required collateral: 2 BTC
+- If controller manipulates and wins 1 BTC
+- But loses 2 BTC collateral
+- Net loss: 1 BTC (manipulation unprofitable)
+
+Challenge mechanism:
+1. Anyone can challenge with evidence
+2. Evidence: controller bet large + controlled outcome
+3. Arbitration by witness set or community vote
+4. Successful challenge = collateral to challenger + victims
+```
+
+**Pros:**
+- Direct financial penalty for manipulation
+- Makes manipulation unprofitable by design
+- Controller has literal skin in the game
+- Clear enforcement mechanism
+
+**Cons:**
+- Requires capital from controller
+- Challenge/arbitration complexity
+- What constitutes "proof" of manipulation?
+- May deter legitimate capsule creation
+
 ---
 
 ## Recommended Approach

@@ -194,6 +194,145 @@ Benefits:
 - Reputation system complexity
 - Gaming resistance
 
+### Option E: Mining Pool Integration
+
+Leverage existing Bitcoin infrastructure operators:
+
+```
+Concept:
+- Mining pools already run Bitcoin full nodes
+- Pools already have infrastructure, uptime, capital
+- Witness functionality = additional revenue stream
+
+Integration:
+1. Pool adds witness daemon alongside mining operations
+2. Pool stakes portion of mining rewards as bond
+3. Witness fees flow to pool (distributed to miners or retained)
+4. Pool reputation already established
+
+Economics:
+- Pool already covers infrastructure costs
+- Witness revenue is pure margin
+- Aligned incentives (pools want Bitcoin ecosystem to thrive)
+```
+
+**Pros:**
+- Existing infrastructure and operators
+- Strong economic alignment with Bitcoin
+- High uptime already required for mining
+- Established trust relationships
+
+**Cons:**
+- Mining pool centralization concerns
+- Pool operators may not want additional complexity
+- Regulatory considerations vary by jurisdiction
+
+### Option F: Insurance/Underwriting Model
+
+Witnesses act as insurers against market failure:
+
+```
+Model:
+1. Witness bond = insurance pool
+2. Each market pays "premium" to witness pool
+3. If market fails (liveness, wrong outcome), pool compensates
+4. Successful resolution = witnesses keep premium + bond intact
+
+Premium calculation:
+  premium = base_rate + risk_factor * market_size
+
+Risk factors:
+- Market duration (longer = more risk)
+- Predicate complexity
+- Historical witness set performance
+
+Claim triggers:
+- No threshold signature by timeout
+- Proven equivocation (witnesses pay slashing + claims)
+- Disputed outcome with evidence
+```
+
+**Pros:**
+- Clear value proposition (insurance is understood)
+- Premium pricing creates market for risk
+- Witnesses have incentive to perform (avoid claims)
+- Participants get downside protection
+
+**Cons:**
+- Complex premium pricing
+- Dispute resolution for claims
+- Requires actuarial expertise
+- Capital requirements may be high
+
+### Option G: Liquid Staking Derivatives
+
+Make witness bonds capital-efficient:
+
+```
+Mechanism:
+1. Witness deposits 1 BTC bond to protocol
+2. Protocol issues 1 wBOND token representing stake
+3. wBOND is tradeable, can be used as collateral elsewhere
+4. Witness earns fees while wBOND circulates
+
+Benefits:
+- Witness capital isn't "locked" - it's productive
+- Lower opportunity cost = more willing witnesses
+- Secondary market for wBOND creates liquidity
+- Can integrate with DeFi for additional yield
+
+Slashing:
+- If witness slashed, wBOND holders take haircut
+- Creates incentive for wBOND holders to monitor witnesses
+- "Slashing insurance" market may emerge
+```
+
+**Pros:**
+- Dramatically reduces opportunity cost
+- Creates ecosystem around witness staking
+- Market-driven witness monitoring
+- Capital efficiency attracts more witnesses
+
+**Cons:**
+- Complexity (tokenization, markets)
+- Requires secondary infrastructure
+- Regulatory classification questions
+- May not work for BTC-only purists
+
+### Option H: Prediction Markets on Witness Performance
+
+Meta-market creates accountability:
+
+```
+Concept:
+- Market: "Will witness set X resolve market Y correctly?"
+- Anyone can bet on witness performance
+- Creates financial incentive to monitor and expose bad witnesses
+
+Implementation:
+1. For each market, derivative market on resolution quality
+2. Bets on: "Correct outcome", "Wrong outcome", "No resolution"
+3. Settles after primary market + challenge period
+4. Witnesses with poor prediction markets = avoided
+
+Self-regulating:
+- Bad witnesses get bet against
+- Being bet against = reputation signal
+- Markets route around unreliable witnesses
+```
+
+**Pros:**
+- Decentralized accountability
+- Financial incentives to monitor
+- Information aggregation about witness quality
+- Self-correcting system
+
+**Cons:**
+- Meta-market complexity
+- Potential for manipulation
+- Circular dependency (who resolves the meta-market?)
+- May be overkill for small markets
+
 ---
 
 ## Recommended Approach
